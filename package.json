@@ -1,0 +1,23 @@
+{
+  "name": "coi-serviceworker",
+  "version": "0.1.0",
+  "description": "Cross-Origin Isolation through a service worker",
+  "main": "coi-serviceworker.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gzuidhof/coi-serviceworker.git"
+  },
+  "keywords": [
+    "cross-origin",
+    "coop",
+    "coep",
+    "isolation",
+    "service-worker"
+  ],
+  "author": "Guido Zuidhof <me@guido.io>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/gzuidhof/coi-serviceworker/issues"
+  },
+  "homepage": "https://github.com/gzuidhof/coi-serviceworker#readme"
+}

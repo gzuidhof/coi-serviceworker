@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+
+    <title>COI</title>
+    <script src="./coi-serviceworker.js"></script>
+</head>
+
+<body>
+    <h1>coi-serviceworker</h1>
+
+    <script>
+        const el = document.createElement("div")
+        el.innerHTML = `Cross origin isolated: ${crossOriginIsolated ? "✅" : "❌"}`
+        document.body.append(el);
+    </script>
+</body>
+
+</html>
