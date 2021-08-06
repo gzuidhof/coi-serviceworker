@@ -1,4 +1,4 @@
-/*! coi-serviceworker v0.1.1 - Guido Zuidhof, licensed under MIT */
+/*! coi-serviceworker v0.1.2 - Guido Zuidhof, licensed under MIT */
 
 if (typeof window === 'undefined') {
     self.addEventListener("install", () => self.skipWaiting());
@@ -62,6 +62,11 @@ if (typeof window === 'undefined') {
         // If we're already coi: do nothing. Perhaps it's due to this script doing its job, or COOP/COEP are
         // already set from the origin server. Also if the browser has no notion of crossOriginIsolated, just give up here.
         if (window.crossOriginIsolated !== false) return;
+
+        if (!window.isSecureContext) {
+            !coi.quiet && console.log("COOP/COEP Service Worker not registered, a secure context is required.");
+            return;
+        }
 
         n.serviceWorker.register(window.document.currentScript.src).then(
             (registration) => {
