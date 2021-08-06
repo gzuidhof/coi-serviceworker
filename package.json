@@ -1,11 +1,14 @@
 {
   "name": "coi-serviceworker",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Cross-Origin Isolation through a service worker",
   "main": "coi-serviceworker.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/gzuidhof/coi-serviceworker.git"
+  },
+  "scripts": {
+    "minify": "terser coi-serviceworker.js --mangle --compress --format --output coi-serviceworker.min.js"
   },
   "keywords": [
     "cross-origin",
@@ -19,5 +22,8 @@
   "bugs": {
     "url": "https://github.com/gzuidhof/coi-serviceworker/issues"
   },
-  "homepage": "https://github.com/gzuidhof/coi-serviceworker#readme"
+  "homepage": "https://github.com/gzuidhof/coi-serviceworker#readme",
+  "devDependencies": {
+    "terser": "^5.7.1"
+  }
 }

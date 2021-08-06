@@ -1,10 +1,12 @@
-# coi-serviceworker
+# coi-serviceworker 
+![npm](https://img.shields.io/npm/v/coi-serviceworker) ![size](https://img.shields.io/github/size/gzuidhof/coi-serviceworker/coi-serviceworker.min.js)
+
 Cross-origin isolation ([COOP and COEP](https://web.dev/coop-coep/)) through a service worker for situations in which you can't control the headers (e.g. GH pages).
 
 
 ## Usage
 
-1. Download `coi-serviceworker.js`.
+1. Download `coi-serviceworker.js` (or `coi-serviceworker.min.js`).
 2. Put it next to your index file (or in any folder above it)
 3. Add to your HTML file:
     ```html
