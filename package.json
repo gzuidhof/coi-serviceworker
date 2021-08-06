@@ -1,6 +1,6 @@
 {
   "name": "coi-serviceworker",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Cross-Origin Isolation through a service worker",
   "main": "coi-serviceworker.js",
   "repository": {
