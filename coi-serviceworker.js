@@ -67,24 +67,27 @@ if (typeof window === 'undefined') {
             return;
         }
 
-        n.serviceWorker.register(window.document.currentScript.src).then(
-            (registration) => {
-                !coi.quiet & console.log("COOP/COEP Service Worker registered", registration.scope);
+        // In some environments (e.g. Chrome incognito mode) this won't be available
+        if (n.serviceWorker) {
+            n.serviceWorker.register(window.document.currentScript.src).then(
+                (registration) => {
+                    !coi.quiet & console.log("COOP/COEP Service Worker registered", registration.scope);
 
-                registration.addEventListener("updatefound", () => {
-                    !coi.quiet && console.log("Reloading page to make use of updated COOP/COEP Service Worker.");
-                    coi.doReload()
-                });
+                    registration.addEventListener("updatefound", () => {
+                        !coi.quiet && console.log("Reloading page to make use of updated COOP/COEP Service Worker.");
+                        coi.doReload()
+                    });
 
-                // If the registration is active, but it's not controlling the page
-                if (registration.active && !n.serviceWorker.controller) {
-                    !coi.quiet && console.log("Reloading page to make use of COOP/COEP Service Worker.");
-                    coi.doReload()
+                    // If the registration is active, but it's not controlling the page
+                    if (registration.active && !n.serviceWorker.controller) {
+                        !coi.quiet && console.log("Reloading page to make use of COOP/COEP Service Worker.");
+                        coi.doReload()
+                    }
+                },
+                (err) => {
+                    !coi.quiet && console.error("COOP/COEP Service Worker failed to register:", err);
                 }
-            },
-            (err) => {
-                !coi.quiet && console.error("COOP/COEP Service Worker failed to register:", err);
-            }
-        );
+            );
+        }
     })();
 }
