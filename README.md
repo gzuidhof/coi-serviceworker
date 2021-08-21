@@ -13,12 +13,12 @@ Cross-origin isolation ([COOP and COEP](https://web.dev/coop-coep/)) through a s
     <script src="coi-serviceworker.js"></script>
     ```
 
-This script will reload the page on the user's first load to magically add the required COOP and COEP headers in a serice worker.
+This script will reload the page on the user's first load to magically add the required COOP and COEP headers in a service worker.
 
 **Rules**:
 * It must be in a separate file, you can't bundle it along with your app. 
 * It can't be loaded from a CDN: it must be served from your own origin.
-* Your page will still need to be either localhost or https enabled.
+* Your page will still need to be either served from HTTPS, or served from localhost.
 
 
 ### Extra credits: download from NPM
