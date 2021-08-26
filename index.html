@@ -14,7 +14,7 @@
 
     <script>
         const el = document.createElement("div")
-        el.innerHTML = `Cross origin isolated: ${crossOriginIsolated ? "✅" : "❌"}`
+        el.innerHTML = `Cross origin isolated: ${window.crossOriginIsolated ? "✅" : "❌"}`
         document.body.append(el);
     </script>
 </body>
