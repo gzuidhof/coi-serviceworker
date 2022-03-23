@@ -71,7 +71,7 @@ if (typeof window === 'undefined') {
         if (n.serviceWorker) {
             n.serviceWorker.register(window.document.currentScript.src).then(
                 (registration) => {
-                    !coi.quiet & console.log("COOP/COEP Service Worker registered", registration.scope);
+                    !coi.quiet && console.log("COOP/COEP Service Worker registered", registration.scope);
 
                     registration.addEventListener("updatefound", () => {
                         !coi.quiet && console.log("Reloading page to make use of updated COOP/COEP Service Worker.");
