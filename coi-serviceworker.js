@@ -1,10 +1,13 @@
 /*! coi-serviceworker v0.1.6 - Guido Zuidhof, licensed under MIT */
+let coepCredless = false;
 if (typeof window === 'undefined') {
     self.addEventListener("install", () => self.skipWaiting());
     self.addEventListener("activate", (event) => event.waitUntil(self.clients.claim()));
 
     self.addEventListener("message", (ev) => {
-        if (ev.data && ev.data.type === "deregister") {
+        if (!ev.data) {
+            return;
+        } else if (ev.data.type === "deregister") {
             self.registration
                 .unregister()
                 .then(() => {
@@ -13,23 +16,33 @@ if (typeof window === 'undefined') {
                 .then(clients => {
                     clients.forEach((client) => client.navigate(client.url));
                 });
+        } else if (ev.data.type === "coepCredless") {
+            coepCredless = ev.data.value;
         }
     });
 
     self.addEventListener("fetch", function (event) {
-        if (event.request.cache === "only-if-cached" && event.request.mode !== "same-origin") {
+        const r = event.request;
+        if (r.cache === "only-if-cached" && r.mode !== "same-origin") {
             return;
         }
 
+        const request = (coepCredless && r.mode === "no-cors")
+            ? new Request(r, {
+                credentials: "omit",
+            })
+            : r;
         event.respondWith(
-            fetch(event.request)
+            fetch(request)
                 .then((response) => {
                     if (response.status === 0) {
                         return response;
                     }
 
                     const newHeaders = new Headers(response.headers);
-                    newHeaders.set("Cross-Origin-Embedder-Policy", "require-corp");
+                    newHeaders.set("Cross-Origin-Embedder-Policy",
+                        coepCredless ? "credentialless" : "require-corp"
+                    );
                     newHeaders.set("Cross-Origin-Opener-Policy", "same-origin");
 
                     return new Response(response.body, {
@@ -48,14 +61,23 @@ if (typeof window === 'undefined') {
         const coi = {
             shouldRegister: () => true,
             shouldDeregister: () => false,
+            coepCredless: () => false,
             doReload: () => window.location.reload(),
             quiet: false,
             ...window.coi
         };
 
         const n = navigator;
-        if (coi.shouldDeregister() && n.serviceWorker && n.serviceWorker.controller) {
-            n.serviceWorker.controller.postMessage({ type: "deregister" });
+
+        if (n.serviceWorker && n.serviceWorker.controller) {
+            n.serviceWorker.controller.postMessage({
+                type: "coepCredless",
+                value: coi.coepCredless(),
+            });
+
+            if (coi.shouldDeregister()) {
+                n.serviceWorker.controller.postMessage({ type: "deregister" });
+            }
         }
 
         // If we're already coi: do nothing. Perhaps it's due to this script doing its job, or COOP/COEP are
