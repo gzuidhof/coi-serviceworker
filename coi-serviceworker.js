@@ -51,7 +51,7 @@ if (typeof window === 'undefined') {
             doReload: () => window.location.reload(),
             quiet: false,
             ...window.coi
-        }
+        };
 
         const n = navigator;
         if (coi.shouldDeregister() && n.serviceWorker && n.serviceWorker.controller) {
@@ -75,13 +75,13 @@ if (typeof window === 'undefined') {
 
                     registration.addEventListener("updatefound", () => {
                         !coi.quiet && console.log("Reloading page to make use of updated COOP/COEP Service Worker.");
-                        coi.doReload()
+                        coi.doReload();
                     });
 
                     // If the registration is active, but it's not controlling the page
                     if (registration.active && !n.serviceWorker.controller) {
                         !coi.quiet && console.log("Reloading page to make use of COOP/COEP Service Worker.");
-                        coi.doReload()
+                        coi.doReload();
                     }
                 },
                 (err) => {
