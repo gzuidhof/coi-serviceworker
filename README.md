@@ -46,7 +46,7 @@ window.coi = {
     shouldDeregister: () => false,
     // A function that is run to decide whether to use "Cross-Origin-Embedder-Policy: credentialless" or not.
     // See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Embedder-Policy#browser_compatibility
-    coepCredless: () => !(navigator.userAgent.indexOf("CriOS") > -1 || !window.chrome),
+    coepCredentialless: () => !(navigator.userAgent.indexOf("CriOS") > -1 || !window.chrome),
     // Override this if you want to prompt the user and do reload at your own leisure. Maybe show the user a message saying:
     // "Click OK to refresh the page to enable <...>"
     doReload: () => window.location.reload(),
