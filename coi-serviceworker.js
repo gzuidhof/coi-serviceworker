@@ -1,5 +1,5 @@
 /*! coi-serviceworker v0.1.6 - Guido Zuidhof, licensed under MIT */
-let coepCredless = false;
+let coepCredentialless = false;
 if (typeof window === 'undefined') {
     self.addEventListener("install", () => self.skipWaiting());
     self.addEventListener("activate", (event) => event.waitUntil(self.clients.claim()));
@@ -16,8 +16,8 @@ if (typeof window === 'undefined') {
                 .then(clients => {
                     clients.forEach((client) => client.navigate(client.url));
                 });
-        } else if (ev.data.type === "coepCredless") {
-            coepCredless = ev.data.value;
+        } else if (ev.data.type === "coepCredentialless") {
+            coepCredentialless = ev.data.value;
         }
     });
 
@@ -27,7 +27,7 @@ if (typeof window === 'undefined') {
             return;
         }
 
-        const request = (coepCredless && r.mode === "no-cors")
+        const request = (coepCredentialless && r.mode === "no-cors")
             ? new Request(r, {
                 credentials: "omit",
             })
@@ -41,7 +41,7 @@ if (typeof window === 'undefined') {
 
                     const newHeaders = new Headers(response.headers);
                     newHeaders.set("Cross-Origin-Embedder-Policy",
-                        coepCredless ? "credentialless" : "require-corp"
+                        coepCredentialless ? "credentialless" : "require-corp"
                     );
                     newHeaders.set("Cross-Origin-Opener-Policy", "same-origin");
 
@@ -61,7 +61,7 @@ if (typeof window === 'undefined') {
         const coi = {
             shouldRegister: () => true,
             shouldDeregister: () => false,
-            coepCredless: () => false,
+            coepCredentialless: () => false,
             doReload: () => window.location.reload(),
             quiet: false,
             ...window.coi
@@ -71,8 +71,8 @@ if (typeof window === 'undefined') {
 
         if (n.serviceWorker && n.serviceWorker.controller) {
             n.serviceWorker.controller.postMessage({
-                type: "coepCredless",
-                value: coi.coepCredless(),
+                type: "coepCredentialless",
+                value: coi.coepCredentialless(),
             });
 
             if (coi.shouldDeregister()) {
