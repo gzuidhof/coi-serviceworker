@@ -25,5 +25,8 @@
   "homepage": "https://github.com/gzuidhof/coi-serviceworker#readme",
   "devDependencies": {
     "terser": "^5.7.1"
-  }
+  },
+  "workspaces": [
+    "examples/*"
+  ]
 }
