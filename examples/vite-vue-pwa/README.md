@@ -1,18 +1,82 @@
-# Vue 3 + TypeScript + Vite
+[⬅️ Back to main README](../../README.md)
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+# Vite & Vue.js PWA
 
-## Recommended IDE Setup
+<div align="center">
 
-- [VS Code](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
+![](https://user-images.githubusercontent.com/61068799/255349329-ef9f4d43-2882-4095-9dbb-0c106a1ef96f.png)
 
-## Type Support For `.vue` Imports in TS
+<!-- prettier-ignore -->
+[Live demo](https://octocat.github.io/ezcoipage/vite-vue-pwa/)
+| [`src/sw.ts`](src/sw.ts)
+| [`src/App.vue`](src/App.vue)
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin) to make the TypeScript language service aware of `.vue` types.
+</div>
 
-If the standalone TypeScript plugin doesn't feel fast enough to you, Volar has also implemented a [Take Over Mode](https://github.com/johnsoncodehk/volar/discussions/471#discussioncomment-1361669) that is more performant. You can enable it by the following steps:
+🔄 Includes `LoadingSpinner` while the SW is registering on first load \
+⚡ Uses [Vite] as the build tool \
+🔰 Uses popular [Vue.js] JavaScript framework \
+🔀 Demos cross-thread `SharedArrayBuffer` mutation \
+🅿️ Uses [Vite PWA] to manage the service worker
 
-1. Disable the built-in TypeScript Extension
-   1. Run `Extensions: Show Built-in Extensions` from VSCode's command palette
-   2. Find `TypeScript and JavaScript Language Features`, right click and select `Disable (Workspace)`
-2. Reload the VSCode window by running `Developer: Reload Window` from the command palette.
+To get started, peruse the code 👩‍💻 and copy-paste 📋 any bits you find
+interesting into your own project! 😊
+
+## Vite PWA gotchas
+
+When you use the [Vite PWA] plugin, there's a few gotchas to be aware of.
+
+1. The dev SW is **not** enabled by default. You need to set
+   `devOptions.enabled: true` in your plugin config. This can be useful if you
+   want to just set-and-forget the service worker in production, but want to use
+   _real headers_ (via Vite middleware) in development.
+
+2. The dev service worker endpoint `/dev-sw.js?dev-sw` is **independent of your
+   `sw.ts` file name**. That means you need some kind of
+   `if (import.meta.env.MODE === "production")` switch to swap between dev SW
+   and prod SW.
+
+3. The dev SW uses ESM, but the prod SW doesn't. That means you need _another
+   switch_ to `if (import.meta.env.MODE === "production")` to swap between
+   `type: "module"` and `type: "classic"` when
+   `navigator.serviceWorker.register()`-ing the service worker.
+
+Here's the config that this example uses:
+
+```js
+// https://vite-pwa-org.netlify.app/guide/service-worker-without-pwa-capabilities.html
+VitePWA({
+   srcDir: "src",
+   filename: "sw.ts",
+   strategies: "injectManifest",
+   injectRegister: false,
+   manifest: false,
+   injectManifest: {
+      // @ts-ignore
+      injectionPoint: null,
+   },
+   // https://vite-pwa-org.netlify.app/guide/development.html#plugin-configuration
+   devOptions: {
+      enabled: true,
+   },
+}),
+```
+
+And here's the relevant code to properly get the SW URL and type:
+
+```ts
+// https://vite-pwa-org.netlify.app/guide/service-worker-without-pwa-capabilities.html#registering-of-the-service-worker-in-your-app
+let swURL: URL;
+let type: "module" | "classic";
+if (import.meta.env.MODE === "production") {
+  swURL = new URL(import.meta.env.BASE_URL + "sw.js", location.href);
+  type = "classic";
+} else {
+  swURL = new URL("/dev-sw.js?dev-sw", location.href);
+  type = "module";
+}
+```
+
+[vite]: https://vitejs.dev/
+[vue.js]: https://vuejs.org/
+[vite pwa]: https://vite-pwa-org.netlify.app/
