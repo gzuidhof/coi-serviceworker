@@ -1,4 +1,3 @@
-import imageURL from "./assets/image.jpg?url";
 // @ts-ignore
 import randomColor from "randomcolor";
 declare var randomColor: () => `#${string}`;
@@ -7,8 +6,9 @@ globalThis.addEventListener("install", (event) => {
   globalThis.skipWaiting();
   event.waitUntil(
     (async () => {
+      const imageURL = new URL("assets/image.jpg", registration.scope);
       const cache = await caches.open("my-cache");
-      await cache.addAll([imageURL]);
+      await cache.addAll([imageURL.href]);
     })()
   );
 });

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import imageURL from "../assets/image.jpg?url";
 
+const imageURL = new URL("assets/image.jpg", location.href);
 const repr = ref<string>();
 
 (async () => {
@@ -25,10 +25,10 @@ const repr = ref<string>();
 
 <template>
   <p>This large image should be cached by the service worker</p>
-  <img src="../assets/image.jpg" width="200" />
+  <img :src="imageURL.href" width="200" />
 
   <p>
-    Here's the cache match for <code>{{ imageURL }}</code> which should exist.
+    Here's the cache match for <code>{{ imageURL.href }}</code> (if any):
   </p>
   <pre><code>{{ repr }}</code></pre>
 </template>
