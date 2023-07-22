@@ -1,16 +1,5 @@
-// @ts-ignore
-import randomColor from "randomcolor";
-declare var randomColor: () => `#${string}`;
-
 globalThis.addEventListener("install", (event) => {
   globalThis.skipWaiting();
-  event.waitUntil(
-    (async () => {
-      const imageURL = new URL("assets/image.jpg", registration.scope);
-      const cache = await caches.open("my-cache");
-      await cache.addAll([imageURL.href]);
-    })()
-  );
 });
 
 globalThis.addEventListener("activate", (event) => {
@@ -18,14 +7,6 @@ globalThis.addEventListener("activate", (event) => {
 });
 
 globalThis.addEventListener("fetch", (event) => {
-  if (
-    new URL(event.request.url).origin === origin &&
-    event.request.method === "GET" &&
-    new URL(event.request.url).pathname === "/sw-api/random-color"
-  ) {
-    return event.respondWith(new Response(JSON.stringify(randomColor())));
-  }
-
   if (
     new URL(event.request.url).origin === origin &&
     event.request.url.startsWith(registration.scope)

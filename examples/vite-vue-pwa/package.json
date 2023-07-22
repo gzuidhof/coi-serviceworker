@@ -9,8 +9,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "randomcolor": "^0.6.2",
-    "unhead": "^1.1.32",
     "vue": "^3.2.47"
   },
   "devDependencies": {
