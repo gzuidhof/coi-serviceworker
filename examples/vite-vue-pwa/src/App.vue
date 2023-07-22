@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Spinner from "./components/Spinner.vue";
+import LoadingSpinner from "./components/LoadingSpinner.vue";
 import SharedArrayBufferWidget from "./components/SharedArrayBufferWidget.vue";
 import CachedImageWidget from "./components/CachedImageWidget.vue";
 import ServiceWorkerWidget from "./components/ServiceWorkerWidget.vue";
@@ -43,5 +43,5 @@ const crossOriginIsolated = globalThis.crossOriginIsolated;
     <ServiceWorkerWidget />
     <RandomColorSWAPIWidget />
   </template>
-  <Spinner v-else />
+  <LoadingSpinner v-else />
 </template>
