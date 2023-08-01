@@ -64,7 +64,7 @@ if (typeof window === 'undefined') {
         const coi = {
             shouldRegister: () => true,
             shouldDeregister: () => false,
-            coepCredentialless: () => !(window.chrome || window.netscape),
+            coepCredentialless: () => (window.chrome !== undefined || window.netscape !== undefined),
             doReload: () => window.location.reload(),
             quiet: false,
             ...window.coi
