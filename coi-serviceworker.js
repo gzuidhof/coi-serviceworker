@@ -60,9 +60,12 @@ if (typeof window === 'undefined') {
 
 } else {
     (() => {
+        const firstTime = !window.sessionStorage.getItem("coiReloadedBySelf");
+        window.sessionStorage.removeItem("coiReloadedBySelf");
+
         // You can customize the behavior of this script through a global `coi` variable.
         const coi = {
-            shouldRegister: () => true,
+            shouldRegister: () => firstTime,
             shouldDeregister: () => false,
             coepCredentialless: () => (window.chrome !== undefined || window.netscape !== undefined),
             doReload: () => window.location.reload(),
@@ -97,6 +100,7 @@ if (typeof window === 'undefined') {
             n.serviceWorker.register(window.document.currentScript.src).then(
                 (registration) => {
                     !coi.quiet && console.log("COOP/COEP Service Worker registered", registration.scope);
+                    window.sessionStorage.setItem("coiReloadedBySelf", "true");
 
                     registration.addEventListener("updatefound", () => {
                         !coi.quiet && console.log("Reloading page to make use of updated COOP/COEP Service Worker.");
