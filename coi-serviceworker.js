@@ -60,12 +60,13 @@ if (typeof window === 'undefined') {
 
 } else {
     (() => {
-        const firstTime = !window.sessionStorage.getItem("coiReloadedBySelf");
+        const reloadedBySelf = window.sessionStorage.getItem("coiReloadedBySelf");
         window.sessionStorage.removeItem("coiReloadedBySelf");
+        const coepDegrading = (reloadedBySelf == "coepdegrade");
 
         // You can customize the behavior of this script through a global `coi` variable.
         const coi = {
-            shouldRegister: () => firstTime,
+            shouldRegister: () => !reloadedBySelf,
             shouldDeregister: () => false,
             coepCredentialless: () => true,
             coepDegrade: () => true,
@@ -83,10 +84,6 @@ if (typeof window === 'undefined') {
         }
         const coepHasFailed = window.sessionStorage.getItem("coiCoepHasFailed");
 
-        // See if it is in degradation process using a volatile storage item.
-        const coepDegrading = window.sessionStorage.getItem("coiCoepDegrading");
-        window.sessionStorage.removeItem("coiCoepDegrading");
-
         if (controlling) {
             // Reload only on the first failure.
             const reloadToDegrade = coi.coepDegrade() && !(
@@ -99,8 +96,8 @@ if (typeof window === 'undefined') {
                     : coi.coepCredentialless(),
             });
             if (reloadToDegrade) {
-                window.sessionStorage.setItem("coiCoepDegrading", "true");
                 !coi.quiet && console.log("Reloading page to degrade COEP.");
+                window.sessionStorage.setItem("coiReloadedBySelf", "coepdegrade");
                 coi.doReload("coepdegrade");
             }
 
@@ -123,16 +120,17 @@ if (typeof window === 'undefined') {
             n.serviceWorker.register(window.document.currentScript.src).then(
                 (registration) => {
                     !coi.quiet && console.log("COOP/COEP Service Worker registered", registration.scope);
-                    window.sessionStorage.setItem("coiReloadedBySelf", "true");
 
                     registration.addEventListener("updatefound", () => {
                         !coi.quiet && console.log("Reloading page to make use of updated COOP/COEP Service Worker.");
+                        window.sessionStorage.setItem("coiReloadedBySelf", "updatefound");
                         coi.doReload();
                     });
 
                     // If the registration is active, but it's not controlling the page
                     if (registration.active && !n.serviceWorker.controller) {
                         !coi.quiet && console.log("Reloading page to make use of COOP/COEP Service Worker.");
+                        window.sessionStorage.setItem("coiReloadedBySelf", "notcontrolling");
                         coi.doReload();
                     }
                 },

@@ -41,8 +41,8 @@ You can customize the behavior by defining a variable `coi` in the global scope 
 window.coi = {
     // A function that is run to decide whether to register the SW or not.
     // You could for instance make this return a value based on whether you actually need to be cross origin isolated or not.
-    // The variable "firstTime" is false only if it has been reloaded by itself.
-    shouldRegister: () => firstTime,
+    // Using "!reloadedBySelf" you can avoid infinite loops of reloading.
+    shouldRegister: () => !reloadedBySelf,
     // If this function returns true, any existing service worker will be deregistered (and nothing else will happen).
     shouldDeregister: () => false,
     // A function that is run to decide whether to use "Cross-Origin-Embedder-Policy: credentialless" or not.
@@ -52,6 +52,7 @@ window.coi = {
     coepDegrade: () => true,
     // Override this if you want to prompt the user and do reload at your own leisure. Maybe show the user a message saying:
     // "Click OK to refresh the page to enable <...>"
+    // You can see window.sessionStorage.getItem("coiReloadedBySelf") for the reason to reload.
     doReload: () => window.location.reload(),
     // Set to true if you don't want coi to log anything to the console.
     quiet: false
