@@ -67,19 +67,42 @@ if (typeof window === 'undefined') {
         const coi = {
             shouldRegister: () => firstTime,
             shouldDeregister: () => false,
-            coepCredentialless: () => (window.chrome !== undefined || window.netscape !== undefined),
+            coepCredentialless: () => true,
+            coepDegrade: () => true,
             doReload: () => window.location.reload(),
             quiet: false,
             ...window.coi
         };
 
         const n = navigator;
+        const controlling = n.serviceWorker && n.serviceWorker.controller;
 
-        if (n.serviceWorker && n.serviceWorker.controller) {
+        // Record the failure if the page is served by serviceWorker.
+        if (controlling && !window.crossOriginIsolated) {
+            window.sessionStorage.setItem("coiCoepHasFailed", "true");
+        }
+        const coepHasFailed = window.sessionStorage.getItem("coiCoepHasFailed");
+
+        // See if it is in degradation process using a volatile storage item.
+        const coepDegrading = window.sessionStorage.getItem("coiCoepDegrading");
+        window.sessionStorage.removeItem("coiCoepDegrading");
+
+        if (controlling) {
+            // Reload only on the first failure.
+            const reloadToDegrade = coi.coepDegrade() && !(
+                coepDegrading || window.crossOriginIsolated
+            );
             n.serviceWorker.controller.postMessage({
                 type: "coepCredentialless",
-                value: coi.coepCredentialless(),
+                value: (reloadToDegrade || coepHasFailed && coi.coepDegrade())
+                    ? false
+                    : coi.coepCredentialless(),
             });
+            if (reloadToDegrade) {
+                window.sessionStorage.setItem("coiCoepDegrading", "true");
+                !coi.quiet && console.log("Reloading page to degrade COEP.");
+                coi.doReload("coepdegrade");
+            }
 
             if (coi.shouldDeregister()) {
                 n.serviceWorker.controller.postMessage({ type: "deregister" });
