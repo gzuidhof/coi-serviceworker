@@ -115,7 +115,7 @@ if (typeof window === 'undefined') {
             return;
         }
 
-        // In some environments (e.g. Chrome incognito mode) this won't be available
+        // In some environments (e.g. Firefox private mode) this won't be available
         if (n.serviceWorker) {
             n.serviceWorker.register(window.document.currentScript.src).then(
                 (registration) => {
@@ -138,6 +138,8 @@ if (typeof window === 'undefined') {
                     !coi.quiet && console.error("COOP/COEP Service Worker failed to register:", err);
                 }
             );
+        } else {
+            !coi.quiet && console.error("COOP/COEP Service Worker not registered, perhaps due to private mode.");
         }
     })();
 }
