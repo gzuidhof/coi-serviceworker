@@ -1,30 +1,82 @@
-name: minify with terser
+name: check version number and minify
+
 on:
   push:
     paths:
       - 'coi-serviceworker.js'
+      - 'package.json'
+
 permissions:
   contents: write
+
 jobs:
-  minify:
-    name: minify
+  ci:
+    name: ci
     runs-on: ubuntu-latest
     steps:
-      - name: checkout
+      - name: checkout with full history
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: setup node
         uses: actions/setup-node@v3
-      - name: install node deps
-        run: npm ci
-      - name: minify
-        run: npm run minify
-      - name: commit and push
+      - name: git config to enable bot to push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git remote set-url origin https://github-actions:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
+
+      - name: npm ci/install
+        run: |
+          if git diff --name-only ${{github.event.before}}..${{github.event.after}} | grep -x 'package.json'
+          then
+            echo "npm install, updating package-lock.json"
+            npm install
+            echo "diff_files=$(git diff --name-only | xargs)" >> "${GITHUB_ENV}"
+          else
+            echo "npm ci, keeping package-lock.json"
+            npm ci
+          fi
+      - name: push package-lock.json
+        if: ${{ env.diff_files == 'package-lock.json' }}
+        run: |
+          git diff
+          git add package-lock.json
+          git commit -m "update package-lock.json"
+          git push origin HEAD:${GITHUB_REF}
+          git diff --exit-code
+
+      - name: get package_version
+        run: |
+          package_version="$(npx -c 'echo $npm_package_version')"
+          echo "package_version=${package_version}" >> "${GITHUB_ENV}"
+          echo "${package_version}" | grep -x -E '[0-9]+\.[0-9]+\.[0-9]+'
+      - name: get js_version
+        run: |
+          js_version="$(sed -n -r -e '1s,^/\*! coi-serviceworker v([0-9]+\.[0-9]+\.[0-9]+) - .*$,\1,;1p' coi-serviceworker.js)"
+          echo "js_version=${js_version}" >> "${GITHUB_ENV}"
+          echo "${js_version}" | grep -x -E '[0-9]+\.[0-9]+\.[0-9]+'
+      - name: push coi-serviceworker.js
+        if: ${{ env.package_version != env.js_version }}
+        run: |
+          sed -i -r -e '1s/ v[0-9]+\.[0-9]+\.[0-9]+ / v'"${package_version}"' /' coi-serviceworker.js
+          git diff
+          git add coi-serviceworker.js
+          git commit -m "sync version numbers"
+          git push origin HEAD:${GITHUB_REF}
+          git diff --exit-code
+
+      - name: minify
+        run: |
+          npm run minify
+          echo "diff_files=$(git diff --name-only | xargs)" >> "${GITHUB_ENV}"
+      - name: push coi-serviceworker.min.js
+        if: ${{ env.diff_files == 'coi-serviceworker.min.js' }}
+        run: |
+          git diff
           git add coi-serviceworker.min.js
           git commit -m "minify"
           git push origin HEAD:${GITHUB_REF}
+          git diff --exit-code
