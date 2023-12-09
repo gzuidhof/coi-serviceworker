@@ -10,73 +10,56 @@ permissions:
   contents: write
 
 jobs:
-  ci:
-    name: ci
+  sync-minify-push:
     runs-on: ubuntu-latest
     steps:
-      - name: checkout with full history
+      - name: checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - name: setup node
         uses: actions/setup-node@v3
       - name: git config to enable bot to push
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git remote set-url origin https://github-actions:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}
+          git remote set-url origin https://github-actions:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
 
-      - name: npm ci/install
+      - name: npm install
         run: |
-          if git diff --name-only ${{github.event.before}}..${{github.event.after}} | grep -x 'package.json'
-          then
-            echo "npm install, updating package-lock.json"
-            npm install
-            echo "diff_files=$(git diff --name-only | xargs)" >> "${GITHUB_ENV}"
-          else
-            echo "npm ci, keeping package-lock.json"
-            npm ci
-          fi
+          cp package-lock.json lock-orig
+          npm install
       - name: push package-lock.json
-        if: ${{ env.diff_files == 'package-lock.json' }}
+        if: ${{ hashFiles('package-lock.json') != hashFiles('lock-orig') }}
         run: |
-          git diff
           git add package-lock.json
           git commit -m "update package-lock.json"
           git push origin HEAD:${GITHUB_REF}
-          git diff --exit-code
 
       - name: get package_version
         run: |
           package_version="$(npx -c 'echo $npm_package_version')"
-          echo "package_version=${package_version}" >> "${GITHUB_ENV}"
-          echo "${package_version}" | grep -x -E '[0-9]+\.[0-9]+\.[0-9]+'
-      - name: get js_version
+          echo "package_version=${package_version}" \
+          | grep -E 'package_version=[0-9]+\.[0-9]+\.[0-9]+$' >> "${GITHUB_ENV}"
+      - name: update coi-serviceworker.js
         run: |
-          js_version="$(sed -n -r -e '1s,^/\*! coi-serviceworker v([0-9]+\.[0-9]+\.[0-9]+) - .*$,\1,;1p' coi-serviceworker.js)"
-          echo "js_version=${js_version}" >> "${GITHUB_ENV}"
-          echo "${js_version}" | grep -x -E '[0-9]+\.[0-9]+\.[0-9]+'
+          cp coi-serviceworker.js js-orig
+          sed -i -E "1s/ v[0-9]+\.[0-9]+\.[0-9]+ / v${package_version} /" coi-serviceworker.js
       - name: push coi-serviceworker.js
-        if: ${{ env.package_version != env.js_version }}
+        if: ${{ hashFiles('coi-serviceworker.js') != hashFiles('js-orig') }}
         run: |
-          sed -i -r -e '1s/ v[0-9]+\.[0-9]+\.[0-9]+ / v'"${package_version}"' /' coi-serviceworker.js
-          git diff
           git add coi-serviceworker.js
           git commit -m "sync version numbers"
           git push origin HEAD:${GITHUB_REF}
-          git diff --exit-code
 
       - name: minify
         run: |
+          mv coi-serviceworker.min.js min-orig
           npm run minify
-          echo "diff_files=$(git diff --name-only | xargs)" >> "${GITHUB_ENV}"
       - name: push coi-serviceworker.min.js
-        if: ${{ env.diff_files == 'coi-serviceworker.min.js' }}
+        if: ${{ hashFiles('coi-serviceworker.min.js') != hashFiles('min-orig') }}
         run: |
-          git diff
           git add coi-serviceworker.min.js
           git commit -m "minify"
           git push origin HEAD:${GITHUB_REF}
-          git diff --exit-code
+
+      - name: git diff
+        run: git diff --exit-code
