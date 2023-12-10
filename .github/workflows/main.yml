@@ -1,0 +1,30 @@
+name: minify with terser
+on:
+  push:
+    paths:
+      - 'coi-serviceworker.js'
+permissions:
+  contents: write
+jobs:
+  minify:
+    name: minify
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+      - name: setup node
+        uses: actions/setup-node@v3
+      - name: install node deps
+        run: npm ci
+      - name: minify
+        run: npm run minify
+      - name: commit and push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git remote set-url origin https://github-actions:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add coi-serviceworker.min.js
+          git commit -m "minify"
+          git push origin HEAD:${GITHUB_REF}
